@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    Document
+    <button id="choose-file">choose-file</button>
+    <button id="create-file">create-file</button>
+    <button id="save-changes-of-file">save-changes-of-file</button>
+    <div id="content" contentEditable="true"></div>
+
+    <script>
+        let fileHandle;
+        let content;
+
+        document.getElementById("choose-file").addEventListener('click', async() => {
+            fileHandle = await window.chooseFileSystemEntries();
+            let fileData = await fileHandle.getFile();
+            document.getElementById("content").innerHTML = content = await fileData.text();
+        });
+
+        document.getElementById('create-file').addEventListener('click', async() => {
+
+            let config = {
+                type: 'save-file',
+                accepts: [{
+                    description: "text file",
+                    extensions: ['txt'],
+                    mimeTypes: ['txt/plain']
+                }]
+            }
+
+            fileHandle = await window.chooseFileSystemEntries(config);
+            
+            return fileHandle;
+
+        });
+
+        document.getElementById("save-changes-of-file").addEventListener('click', async () => {
+            debugger;
+            if (fileHandle.createWriter) {
+                // Create a writer (request permission if necessary).
+                const writer = await fileHandle.createWriter();
+                // Write the full length of the contents
+                await writer.write(0, "salam");
+                // Close the file and write the contents to disk
+                await writer.close();
+                return;
+            }
+            // For Chrome 83 and later.
+            // Create a FileSystemWritableFileStream to write to.
+            const writable = await fileHandle.createWritable();
+            // Write the contents of the file to the stream.
+            await writable.write("salam");
+            // Close the file and write the contents to disk.
+            await writable.close();
+        });    
+
+    </script>
+</body>
+</html>
